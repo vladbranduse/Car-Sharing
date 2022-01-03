@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class DataBase {
 
     static final String JDBC_DRIVER = "org.h2.Driver";
-    static String DB_URL = "jdbc:h2:./src/carsharing/db/carsharing";
+    static String DB_URL = "jdbc:h2:./src/carsharing/db";
 
     static void createTables() {
 
