@@ -9,8 +9,6 @@ public class Main {
 
         if (args.length > 0) {
             DataBase.DB_URL += args[1];
-        } else {
-            DataBase.DB_URL += "theDatabase";
         }
 
         DataBase.createTables();
