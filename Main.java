@@ -14,7 +14,6 @@ public class Main {
         DataBase.createTables();
         Scanner scanner = new Scanner(System.in);
         Manager mg = new Manager();
-        Customer ct = new Customer();
         String username = "";
         String adminUsername = "Admin";
         System.out.println("Login");
