@@ -1,7 +1,60 @@
 package carsharing;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Scanner;
+
+class MainInterface {
+      JFrame f;
+      JLabel username;
+      JTextField userfield;
+      JButton login;
+      JLabel success;
+      MainInterface() {
+          f = new JFrame("Car Sharing");
+          f.setSize(400, 400);
+          f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+          username = new JLabel("Username: ");
+          userfield = new JTextField();
+          login = new JButton("Login");
+          success = new JLabel();
+          username.setBounds(50, 150, 100, 30);
+          userfield.setBounds(150, 150, 150, 30);
+          login.setBounds(50, 200, 100, 30);
+          success.setBounds(50, 250, 200, 60);
+          login.addActionListener(new ActionListener() {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                  String usertext;
+                  usertext = userfield.getText();
+                  if (usertext.equals("Admin")) {
+                      f.setVisible(false);
+                      new Manager();
+                  } else {
+                      ArrayList<String> customerList = DataBase.listOfCustomers();
+                      if (customerList.contains(usertext)) {
+                          f.setVisible(false);
+                          new CustomerAccount(usertext);
+                      } else {
+                          if (DataBase.createCustomer(usertext)) {
+                              f.setVisible(false);
+                              new CustomerAccount(usertext);
+                          } else {
+                              success.setText("The user failed to be registered!");
+                          }
+                      }
+                  }
+              }
+          });
+          f.add(username);
+          f.add(userfield);
+          f.add(login);
+          f.add(success);
+          f.setLayout(null);
+          f.setVisible(true);
+      }
+}
 
 public class Main {
 
@@ -12,40 +65,6 @@ public class Main {
         }
 
         DataBase.createTables();
-        Scanner scanner = new Scanner(System.in);
-        Manager mg = new Manager();
-        String username = "";
-        String adminUsername = "Admin";
-        System.out.println("Login");
-        System.out.print("Username: ");
-        username = scanner.nextLine();
-        if (username.equals(adminUsername)) {
-            mg.openManager();
-        } else {
-            ArrayList<CustomerAccount> listOfCustomers = DataBase.listOfCustomers();
-            int notFound = 1;
-            String cstName = "NULL";
-            int cstId = 0;
-            int cstRentedCarId = 0;
-            for (CustomerAccount lc: listOfCustomers) {
-                if (lc.name.equals(username)) {
-                    notFound = 0;
-                    break;
-                }
-            }
-            if (notFound == 1) {
-                DataBase.createCustomer(username);
-            }
-            for (CustomerAccount lc: listOfCustomers) {
-                if (lc.name.equals(username)) {
-                        cstId = lc.id;
-                        cstName = lc.name;
-                        cstRentedCarId = lc.rentedCarId;
-                        break;
-                    }
-            }
-            CustomerAccount currentCustomer = new CustomerAccount(cstId, cstName, cstRentedCarId);
-            currentCustomer.customerAccountInteraction();
-        }
+        new MainInterface();
     }
 }

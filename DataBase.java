@@ -2,7 +2,7 @@ package carsharing;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Scanner;
+import javax.swing.DefaultListModel;
 
 public class DataBase {
 
@@ -45,7 +45,7 @@ public class DataBase {
         }
     }
 
-    static void createCompany(String companyName) {
+    static boolean createCompany(String companyName) {
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -56,18 +56,19 @@ public class DataBase {
 
                     String sql = "INSERT INTO COMPANY(NAME) VALUES('" + companyName + "');";
                     statement.executeUpdate(sql);
-                    System.out.println("The company was created!");
                     System.out.println();
                 }
             }
+            return true;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    static ArrayList<Company> listOfCompanies() {
+    static DefaultListModel listOfCompaniesGUI() {
 
-        ArrayList<Company> companyList = new ArrayList<>();
+        DefaultListModel dm = new DefaultListModel();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -90,8 +91,46 @@ public class DataBase {
                         res = statement.executeQuery(listQuery);
 
                         while (res.next()) {
-                            Company company = new Company(res.getInt(1), res.getString(2));
-                            companyList.add(company);
+                            String name = res.getString(2);
+                            dm.addElement(name);
+                        }
+                    }
+                }
+            }
+            return dm;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    static ArrayList<String> listOfCompanies() {
+
+        ArrayList<String> companyList = new ArrayList<>();
+
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String countQuery = "SELECT COUNT(*) FROM COMPANY";
+                    var res = statement.executeQuery(countQuery);
+                    int count = -1;
+
+                    while (res.next()) {
+                        count = res.getInt(1);
+                    }
+
+                    if (count > 0) {
+
+                        String listQuery = "SELECT * FROM COMPANY";
+                        res = statement.executeQuery(listQuery);
+
+                        while (res.next()) {
+                            String companyName = res.getString(2);
+                            companyList.add(companyName);
                         }
                     }
                 }
@@ -102,8 +141,7 @@ public class DataBase {
         return companyList;
     }
 
-    static void createCar(String name, int companyId) {
-
+    static int nameid(String companyName) {
         try {
             Class.forName(JDBC_DRIVER);
             try (Connection connection = DriverManager.getConnection(DB_URL)) {
@@ -111,20 +149,42 @@ public class DataBase {
                 connection.setAutoCommit(true);
                 try (Statement statement = connection.createStatement()) {
 
-                    String sql = "INSERT INTO CAR(NAME, COMPANY_ID) VALUES('" + name + "', " + companyId + ");";
-                    statement.executeUpdate(sql);
-                    System.out.println("The car was added!");
-                    System.out.println();
+                    String query = "SELECT ID FROM COMPANY WHERE NAME LIKE '%" + companyName + "%' ;";
+                    var res = statement.executeQuery(query);
+                    while (res.next()) {
+                          int nid = res.getInt("ID");
+                          return nid;
+                    }
                 }
             }
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
+        return -1;
     }
 
-    static ArrayList<Car> listOfCars(int companyId) {
+    static boolean createCar(String name, int companyId) {
 
-        ArrayList<Car> carList = new ArrayList<>();
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+                    String sql = "INSERT INTO CAR(NAME, COMPANY_ID) VALUES('" + name + "', " + companyId + ");";
+                    statement.executeUpdate(sql);
+                }
+            }
+            return true;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    static DefaultListModel listOfCarsGUI(int companyId) {
+
+        DefaultListModel dm = new DefaultListModel();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -148,7 +208,45 @@ public class DataBase {
                         res = statement.executeQuery(listQuery);
 
                         while (res.next()) {
-                            carList.add(new Car(res.getInt(1), res.getString(2), companyId));
+                            String name = res.getString(2);
+                            dm.addElement(name);
+                        }
+                    }
+                }
+            }
+            return dm;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    static ArrayList<String> listOfCars(int companyId) {
+
+        ArrayList<String> carList = new ArrayList<>();
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String countQuery = "SELECT COUNT(*) FROM CAR";
+                    var res = statement.executeQuery(countQuery);
+                    int count = -1;
+
+                    while (res.next()) {
+                        count = res.getInt(1);
+                    }
+
+                    if (count > 0) {
+                        String listQuery = "SELECT * " +
+                                "FROM CAR " +
+                                "WHERE COMPANY_ID = " + companyId + ";";
+                        res = statement.executeQuery(listQuery);
+
+                        while (res.next()) {
+                            carList.add(res.getString(2));
                         }
                     }
                 }
@@ -159,7 +257,7 @@ public class DataBase {
         return carList;
     }
 
-    static void createCustomer(String name) {
+    static boolean createCustomer(String name) {
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -170,18 +268,56 @@ public class DataBase {
 
                     String sql = "INSERT INTO CUSTOMER(NAME) VALUES('" + name + "');";
                     statement.executeUpdate(sql);
-                    System.out.println("The customer was added!");
-                    System.out.println();
                 }
             }
+            return true;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    static ArrayList<CustomerAccount> listOfCustomers() {
+    static DefaultListModel listOfCustomersGUI() {
 
-        ArrayList<CustomerAccount> customers = new ArrayList<>();
+        DefaultListModel dm = new DefaultListModel();
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String countQuery = "SELECT COUNT(*) FROM CUSTOMER;";
+                    var res = statement.executeQuery(countQuery);
+                    int count = -1;
+
+                    while (res.next()) {
+                        count = res.getInt(1);
+                    }
+
+                    if (count > 0) {
+
+                        String listQuery = "SELECT * FROM CUSTOMER";
+                        res = statement.executeQuery(listQuery);
+
+                        while (res.next()) {
+
+                            String name = res.getString(2);
+                            dm.addElement(name);
+                        }
+                    }
+                }
+            }
+            return dm;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    static ArrayList<String> listOfCustomers() {
+
+        ArrayList<String> customers = new ArrayList<>();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -205,21 +341,67 @@ public class DataBase {
 
                         while (res.next()) {
 
-                            CustomerAccount customer = new CustomerAccount(res.getInt(1),
-                                    res.getString(2),
-                                    -1);
-                            customers.add(customer);
+                            String name = res.getString(2);
+                            customers.add(name);
                         }
+                    }
+                }
+            }
+            return customers;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    static int customerid(String customerName) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String query = "SELECT ID FROM CUSTOMER WHERE NAME LIKE '%" + customerName + "%' ;";
+                    var res = statement.executeQuery(query);
+                    while (res.next()) {
+                        int nid = res.getInt("ID");
+                        return nid;
                     }
                 }
             }
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
-        return customers;
+        return -1;
     }
 
-    static void rentACar(CustomerAccount customerAccount) {
+    static int nameid2(String carName) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String query = "SELECT ID FROM CAR WHERE NAME LIKE '%" + carName + "%' ;";
+                    var res = statement.executeQuery(query);
+                    while (res.next()) {
+                        int nid = res.getInt("ID");
+                        return nid;
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    static DefaultListModel getRentedCarId() {
+
+        DefaultListModel dm = new DefaultListModel();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -228,77 +410,44 @@ public class DataBase {
                 connection.setAutoCommit(true);
                 try (Statement statement = connection.createStatement()) {
 
-                    String sql = "SELECT * FROM CUSTOMER WHERE ID = " + customerAccount.id + ";";
-                    ResultSet customer = statement.executeQuery(sql);
-
-                    int carId = -1;
-                    String carName = "NULL";
-
-                    while (customer.next()) {
-
-                        if (customer.getObject(3) != null) {
-                            System.out.println("You've already rented a car!\n");
-                            return;
-                        } else {
-
-                            Scanner scanner = new Scanner(System.in);
-
-                            ArrayList<Company> companies = DataBase.listOfCompanies();
-
-                            if (companies.size() == 0) {
-                                System.out.println("The company list is empty!");
-                                System.out.println();
-                                return;
-                            } else {
-                                Manager.printCompanies(companies);
-
-                                int companySelection = Integer.parseInt(scanner.nextLine());
-                                System.out.println();
-
-                                if (companySelection == 0) {
-                                    return;
-                                }
-
-                                int companyId = companies.get(companySelection - 1).id;
-                                String companyName = companies.get(companySelection - 1).name;
-
-                                ArrayList<Car> carList = DataBase.listOfCars(companyId);
-
-                                if (carList.size() == 0) {
-                                    System.out.println("No available cars in the '" + companyName + "' company");
-                                    System.out.println();
-                                    return;
-                                } else {
-
-                                    Company.printCars(carList);
-                                    System.out.println("0. Back");
-
-                                    int carSelection = Integer.parseInt(scanner.nextLine());
-                                    System.out.println();
-
-                                    if (carSelection == 0) {
-                                        return;
-                                    }
-                                    carId = carList.get(carSelection - 1).id;
-                                    carName = carList.get(carSelection - 1).name;
-                                }
-                            }
-                        }
+                    String sql = "SELECT RENTED_CAR_ID FROM CUSTOMER";
+                    var res = statement.executeQuery(sql);
+                    while (res.next()) {
+                            int id = res.getInt("RENTED_CAR_ID");
+                            dm.addElement(id);
                     }
+                }
+            }
+            return dm;
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-                    sql = "UPDATE CUSTOMER SET RENTED_CAR_ID = " +
-                            carId + " WHERE ID = " + customerAccount.id;
+    static boolean rentACar(int carId, int customerId) {
+
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String sql = "UPDATE CUSTOMER SET RENTED_CAR_ID = " + carId + " WHERE ID = " + customerId;
                     statement.executeUpdate(sql);
-                    System.out.println("You rented '" + carName + "'");
-                    System.out.println();
                 }
             }
+            return true;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    static void getCustomersRentedCar(CustomerAccount customerAccount) {
+
+
+    static String getCustomersRentedCar(String customerName) {
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -307,7 +456,8 @@ public class DataBase {
                 connection.setAutoCommit(true);
                 try (Statement statement = connection.createStatement()) {
 
-                    String query = "SELECT RENTED_CAR_ID FROM CUSTOMER WHERE ID=" + customerAccount.id + ";";
+                    int customerId = customerid(customerName);
+                    String query = "SELECT RENTED_CAR_ID FROM CUSTOMER WHERE ID=" + customerId + ";";
                     ResultSet res = statement.executeQuery(query);
 
                     String carName = "NULL";
@@ -318,8 +468,7 @@ public class DataBase {
                     while (res.next()) {
 
                         if (res.getObject(1) == null) {
-                            System.out.println("You didn't rent a car!\n");
-                            return;
+                            return null;
                         } else {
                             rentedCarId = res.getInt(1);
                         }
@@ -341,19 +490,17 @@ public class DataBase {
                         companyName = company.getString("NAME");
                     }
 
-                    System.out.println("Your rented car:");
-                    System.out.println(carName);
-                    System.out.println("Company:");
-                    System.out.println(companyName);
-                    System.out.println();
+                    return carName;
                 }
             }
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
-    static void returnCar(CustomerAccount customerAccount) {
+
+    static boolean returnCar(String cstr) {
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -362,26 +509,25 @@ public class DataBase {
                 connection.setAutoCommit(true);
                 try (Statement statement = connection.createStatement()) {
 
-                    String sql = "SELECT * FROM CUSTOMER WHERE ID=" + customerAccount.id + ";";
+                    int customerId = customerid(cstr);
+                    String sql = "SELECT * FROM CUSTOMER WHERE ID=" + customerId + ";";
                     ResultSet customer = statement.executeQuery(sql);
 
                     while (customer.next()) {
 
                         if (customer.getObject(3) == null) {
-                            System.out.println("You didn't rent a car!\n");
-                            return;
+                            return false;
                         }
                     }
 
-                    sql = "UPDATE CUSTOMER SET RENTED_CAR_ID = NULL WHERE ID = " + customerAccount.id;
+                    sql = "UPDATE CUSTOMER SET RENTED_CAR_ID = NULL WHERE ID = " + customerId;
                     statement.executeUpdate(sql);
-                    System.out.println("You've returned a rented car!\n");
                 }
             }
+            return true;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
-
-
 }
