@@ -224,6 +224,7 @@ public class DataBase {
     static ArrayList<String> listOfCars(int companyId) {
 
         ArrayList<String> carList = new ArrayList<>();
+
         try {
             Class.forName(JDBC_DRIVER);
             try (Connection connection = DriverManager.getConnection(DB_URL)) {
@@ -248,6 +249,32 @@ public class DataBase {
                         while (res.next()) {
                             carList.add(res.getString(2));
                         }
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return carList;
+    }
+
+    static ArrayList<String> listOfAllCars() {
+
+        ArrayList<String> carList = new ArrayList<>();
+
+        try {
+
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String countQuery = "SELECT * FROM CAR";
+                    var res = statement.executeQuery(countQuery);
+
+                    while (res.next()) {
+                        carList.add(res.getString(2));
                     }
                 }
             }
@@ -397,6 +424,28 @@ public class DataBase {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    static int checkRental(String customer) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+
+                connection.setAutoCommit(true);
+                try (Statement statement = connection.createStatement()) {
+
+                    String query = "SELECT RENTED_CAR_ID FROM CUSTOMER WHERE NAME LIKE '%" + customer + "%' ;";
+                    var res = statement.executeQuery(query);
+                    while (res.next()) {
+                        int nid = res.getInt("RENTED_CAR_ID");
+                        return nid;
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     static DefaultListModel getRentedCarId() {

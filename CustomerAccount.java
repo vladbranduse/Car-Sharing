@@ -12,11 +12,11 @@ class Rental{
         f = new JFrame("Car Sharing");
         f.setSize(800, 800);
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JLabel l = new JLabel();
-        l.setBounds(80, 800, 300, 200);
         int companyid = DataBase.nameid(company);
         DefaultListModel<String> list = DataBase.listOfCarsGUI(companyid);
         ArrayList<String> lc = Collections.list(list.elements());
+        JLabel l = new JLabel();
+        l.setBounds(50, 60 + 100 * lc.size(), 300, 200);
         int i = 0;
         while (i < lc.size()) {
             int finalI = i;
@@ -41,9 +41,19 @@ class Rental{
                 }
             });
             f.add(b);
-            f.add(l);
             i++;
         }
+        f.add(l);
+        JButton back = new JButton("Back");
+        back.setBounds(50, 50 + 100 * lc.size(), 250, 100);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new rentACar(customer);
+            }
+        });
+        f.add(back);
         f.setLayout(null);
         f.setVisible(true);
     }
@@ -51,26 +61,55 @@ class Rental{
 
 class rentACar {
     JFrame f;
+    JLabel l;
+    JButton back;
     rentACar(String customer) {
         f = new JFrame("Car Sharing");
         f.setSize(400, 400);
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        DefaultListModel<String> ls = DataBase.listOfCompaniesGUI();
-        ArrayList<String> lc = Collections.list(ls.elements());
-        int i = 0;
-        while (i < lc.size()) {
-            int finalI = i;
-            JButton b = new JButton(lc.get(i));
-            b.setBounds(50, 50 + 100 * i, 250, 100);
-            b.addActionListener(new ActionListener() {
+        if (DataBase.checkRental(customer) != 0) {
+            l = new JLabel();
+            l.setBounds(50, 100, 500, 35);
+            l.setText("You've already rented a car!");
+            back = new JButton("Back");
+            back.setBounds(50, 150, 100, 35);
+            back.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                     f.setVisible(false);
-                     new Rental(lc.get(finalI), customer);
+                    f.setVisible(false);
+                    new CustomerAccount(customer);
                 }
             });
-            f.add(b);
-            i++;
+            f.add(l);
+            f.add(back);
+        } else {
+            DefaultListModel<String> ls = DataBase.listOfCompaniesGUI();
+            ArrayList<String> lc = Collections.list(ls.elements());
+            int i = 0;
+            while (i < lc.size()) {
+                int finalI = i;
+                JButton b = new JButton(lc.get(i));
+                b.setBounds(50, 50 + 100 * i, 250, 100);
+                b.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        f.setVisible(false);
+                        new Rental(lc.get(finalI), customer);
+                    }
+                });
+                f.add(b);
+                i++;
+            }
+            back = new JButton("Back");
+            back.setBounds(50, 50 + 100 * lc.size(), 250, 100);
+            back.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    f.setVisible(false);
+                    new CustomerAccount(customer);
+                }
+            });
+            f.add(back);
         }
         f.setLayout(null);
         f.setVisible(true);
@@ -80,18 +119,46 @@ class rentACar {
 class returnACar {
     JFrame f;
     JLabel l;
+    JButton back;
     returnACar(String customer) {
         f = new JFrame("Car Sharing");
         f.setSize(400, 400);
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        l = new JLabel();
-        l.setBounds(50, 150, 500, 35);
-        if (DataBase.returnCar(customer)) {
-            l.setText("The rented car was succesfully returned!");
+        if (DataBase.checkRental(customer) == 0) {
+            l = new JLabel();
+            l.setBounds(50, 100, 500, 35);
+            l.setText("You didn't rent a car!");
+            back = new JButton("Back");
+            back.setBounds(50, 150, 100, 35);
+            back.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    f.setVisible(false);
+                    new CustomerAccount(customer);
+                }
+            });
+            f.add(l);
+            f.add(back);
         } else {
-            l.setText("There was an error in returning the rented car!");
+            l = new JLabel();
+            l.setBounds(50, 150, 500, 35);
+            if (DataBase.returnCar(customer)) {
+                l.setText("The rented car was succesfully returned!");
+            } else {
+                l.setText("There was an error in returning the rented car!");
+            }
+            back = new JButton("Back");
+            back.setBounds(50, 200, 200, 50);
+            back.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    f.setVisible(false);
+                    new CustomerAccount(customer);
+                }
+            });
+            f.add(l);
+            f.add(back);
         }
-        f.add(l);
         f.setLayout(null);
         f.setVisible(true);
     }
@@ -100,15 +167,26 @@ class returnACar {
 class myRentedCar{
     JFrame f;
     JLabel l;
+    JButton back;
     myRentedCar(String customer) {
         f = new JFrame("Car Sharing");
         f.setSize(400, 400);
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         l = new JLabel();
         l.setBounds(50, 150, 500, 35);
+        back = new JButton("Back");
+        back.setBounds(50, 200, 200, 50);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new CustomerAccount(customer);
+            }
+        });
         String returnedCar = DataBase.getCustomersRentedCar(customer);
-        l.setText("My rented car is " + returnedCar);
+        l.setText("Your rented car is " + returnedCar);
         f.add(l);
+        f.add(back);
         f.setLayout(null);
         f.setVisible(true);
     }
@@ -119,6 +197,7 @@ public class CustomerAccount {
     JButton rentACar;
     JButton returnACar;
     JButton myRentedCar;
+    JButton back;
     int id;
     CustomerAccount(String customer) {
         f = new JFrame("Car Sharing");
@@ -152,9 +231,19 @@ public class CustomerAccount {
                  new myRentedCar(customer);
             }
         });
+        back = new JButton("Back");
+        back.setBounds(50, 200, 200, 50);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new MainInterface();
+            }
+        });
         f.add(rentACar);
         f.add(returnACar);
         f.add(myRentedCar);
+        f.add(back);
         f.setLayout(null);
         f.setVisible(true);
     }

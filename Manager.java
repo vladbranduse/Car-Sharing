@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 class ListOfCompanies {
     JFrame f;
+    JButton back;
     ListOfCompanies() {
         f = new JFrame("Car Sharing");
         f.setSize(400, 400);
@@ -31,6 +32,16 @@ class ListOfCompanies {
             f.add(b);
             i++;
         }
+        back = new JButton("Back");
+        back.setBounds(50, 50 + 100 * lc.size(), 250, 100);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new Manager();
+            }
+        });
+        f.add(back);
         f.setLayout(null);
         f.setVisible(true);
     }
@@ -47,6 +58,8 @@ class createACompany {
           t.setBounds(50, 100, 200, 30);
           JButton b = new JButton("Create");
           b.setBounds(50, 150, 95, 30);
+          JButton back = new JButton("Back");
+          back.setBounds(50, 180, 95, 30);
           JLabel l1 = new JLabel();
           l1.setBounds(50, 200, 100, 30);
           b.addActionListener(new ActionListener() {
@@ -65,9 +78,17 @@ class createACompany {
                   }
               }
           });
+          back.addActionListener(new ActionListener() {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                  f.setVisible(false);
+                  new Manager();
+              }
+          });
           f.add(l);
           f.add(t);
           f.add(b);
+          f.add(back);
           f.add(l1);
           f.setLayout(null);
           f.setVisible(true);
@@ -83,7 +104,17 @@ class ListOfCustomers {
          DefaultListModel<String> list = DataBase.listOfCustomersGUI();
          JList<String> l = new JList<>(list);
          l.setBounds(50, 100, 150, 150);
+         JButton back = new JButton("Back");
+         back.setBounds(50, 300, 100, 90);
+         back.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 f.setVisible(false);
+                 new Manager();
+             }
+         });
          f.add(l);
+         f.add(back);
          f.setLayout(null);
          f.setVisible(true);
      }
@@ -94,6 +125,7 @@ public class Manager {
     JButton companyList;
     JButton createACompany;
     JButton customerList;
+    JButton back;
     Manager() {
         f = new JFrame("Car Sharing");
         f.setSize(400, 400);
@@ -101,9 +133,11 @@ public class Manager {
         companyList = new JButton("Company list");
         createACompany = new JButton("Create a company");
         customerList = new JButton("Customer list");
+        back = new JButton("Back");
         companyList.setBounds(50, 50, 200, 50);
         createACompany.setBounds(50, 100, 200, 50);
         customerList.setBounds(50, 150, 200, 50);
+        back.setBounds(50, 200, 200, 50);
         companyList.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -125,9 +159,17 @@ public class Manager {
                new ListOfCustomers();
             }
         });
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new MainInterface();
+            }
+        });
         f.add(companyList);
         f.add(createACompany);
         f.add(customerList);
+        f.add(back);
         f.setLayout(null);
         f.setVisible(true);
     }

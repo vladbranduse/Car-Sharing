@@ -30,6 +30,16 @@ public class Company {
                   JList<String> l = new JList<>(list);
                   l.setBounds(50, 100, 150, 150);
                   f2.add(l);
+                  JButton back = new JButton("Back");
+                  back.setBounds(50, 300, 100, 90);
+                  back.addActionListener(new ActionListener() {
+                      @Override
+                      public void actionPerformed(ActionEvent e) {
+                          f2.setVisible(false);
+                          f.setVisible(true);
+                      }
+                  });
+                  f2.add(back);
                   f2.setLayout(null);
                   f2.setVisible(true);
             }
@@ -40,23 +50,26 @@ public class Company {
         b2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame f = new JFrame("Car Sharing");
-                f.setSize(400, 400);
-                f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                JFrame f1 = new JFrame("Car Sharing");
+                f1.setSize(400, 400);
+                f1.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 JLabel l = new JLabel("Enter the name of the car here: ");
                 l.setBounds(50, 50, 250, 30);
                 JTextField t = new JTextField();
                 t.setBounds(50, 100, 200, 30);
                 JButton b = new JButton("Create");
                 b.setBounds(50, 150, 95, 30);
+                JButton back = new JButton("Back");
+                back.setBounds(50, 200, 95, 30);
                 JLabel l1 = new JLabel();
-                l1.setBounds(50, 200, 200, 30);
+                l1.setBounds(50, 250, 200, 30);
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         String text = t.getText();
                         ArrayList<String> clist = DataBase.listOfCars(companyid);
-                        if (clist.contains(text)) {
+                        ArrayList<String> alist = DataBase.listOfAllCars();
+                        if (clist.contains(text) || alist.contains(text)) {
                             l1.setText("The car is already registered!");
                         } else {
                             if (DataBase.createCar(text, companyid)) {
@@ -67,15 +80,34 @@ public class Company {
                         }
                     }
                 });
-                f.add(l);
-                f.add(t);
-                f.add(b);
-                f.add(l1);
-                f.setLayout(null);
-                f.setVisible(true);
+                back.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        f1.setVisible(false);
+                        f.setVisible(true);
+                    }
+                });
+                f1.add(l);
+                f1.add(t);
+                f1.add(b);
+                f1.add(back);
+                f1.add(l1);
+                f1.setLayout(null);
+                f1.setVisible(true);
             }
         });
         f.add(b2);
+        JButton back = new JButton("Back");
+        back.setBounds(50, 250, 300, 90);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setVisible(false);
+                new ListOfCompanies();
+            }
+        });
+        f.add(back);
+        f.setLayout(null);
         f.setVisible(true);
     }
 }
